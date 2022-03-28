@@ -22,28 +22,27 @@ class SurveyPresenter extends Bloc<SurveyEvent, SurveyState> {
     required this.taskNavigator,
     required this.onResult,
   }) : super(LoadingSurveyState()) {
+    final SurveyState currentState = state;
+
+    on<StartSurvey>((event, emit) => emit(_handleInitialStep()));
+
+    on<NextStep>((event, emit) {
+      if (currentState is PresentingSurveyState)
+        emit(_handleNextStep(event, currentState));
+    });
+
+    on<StepBack>((event, emit) {
+      if (currentState is PresentingSurveyState)
+        emit(_handleStepBack(event, currentState));
+    });
+
+    on<CloseSurvey>((event, emit) {
+      if (currentState is PresentingSurveyState)
+        emit(_handleClose(event, currentState));
+    });
+
     this.startDate = DateTime.now();
     add(StartSurvey());
-  }
-
-  @override
-  Stream<SurveyState> mapEventToState(SurveyEvent event) async* {
-    final SurveyState currentState = state;
-    if (event is StartSurvey) {
-      yield _handleInitialStep();
-    }
-
-    if (event is NextStep && currentState is PresentingSurveyState) {
-      yield _handleNextStep(event, currentState);
-    }
-
-    if (event is StepBack && currentState is PresentingSurveyState) {
-      yield _handleStepBack(event, currentState);
-    }
-
-    if (event is CloseSurvey && currentState is PresentingSurveyState) {
-      yield _handleClose(event, currentState);
-    }
   }
 
   SurveyState _handleInitialStep() {
